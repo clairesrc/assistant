@@ -26,6 +26,18 @@ p {
   background: #474973;
 }
 
+.list-group-item {
+  background: #0d0c1d;
+}
+
+.item-wrap,
+.item-image {
+  height: 20em;
+  background-position: center center;
+  background-size: cover;
+  overflow: hidden;
+}
+
 #wrap {
   height: 100vh;
 }

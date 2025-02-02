@@ -5,7 +5,7 @@
   "version": "3.0.1",
   "scripts": {
     "build": "webpack --mode production",
-    "start": "webpack serve --hot --open --mode development",
+    "start": "webpack serve --hot --open --mode development --host 0.0.0.0",
     "test": "jest",
     "lint": "yarn lint:scripts && yarn lint:styles && yarn lint:editor",
     "lint:scripts": "eslint --fix \"./app/**/*.js\"",
