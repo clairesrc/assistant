@@ -1,13 +1,31 @@
-@import './variables';
+@import "./variables";
 
 /* Import Vendor */
-@import 'vendor/bootstrap';
+@import "vendor/bootstrap";
 
 /* Import Base */
-@import 'base/global';
-@import 'base/fonts';
-@import 'base/states';
-@import 'base/utilities';
+@import "base/global";
+@import "base/fonts";
+@import "base/states";
+@import "base/utilities";
 
 /* Import Components */
-@import 'components/logo.component';
+@import "components/logo.component";
+
+html,
+body {
+  background: #0d0c1d;
+  color: #f1dac4l;
+}
+
+p {
+  color: #9c9c9c;
+}
+
+.card {
+  background: #474973;
+}
+
+#wrap {
+  height: 100vh;
+}

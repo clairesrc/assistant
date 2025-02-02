@@ -2,16 +2,16 @@ $default-font-size: 16px;
 
 $color-basic: (
   brightest: #ffffff,
-  brighter: #f3f3f3,
-  bright: #dadada,
+  brighter: #f1dac4,
+  bright: #a69cac,
   normal: null,
   dark: #9c9c9c,
-  darker: #585858,
-  darkest: #131313
+  darker: #474973,
+  darkest: #0d0c1d
 );
 
 $color-primary: (
-  normal: #00ff00
+  normal: #f1dac4
 );
 
 $time: (
