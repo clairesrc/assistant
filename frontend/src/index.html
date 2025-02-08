@@ -17,7 +17,7 @@
           <div class="col align-middle">
             <h1 class="u-color-basic-darker">Assistant</h1>
           </div>
-          <div class="col-6 text-right u-color-basic-darker">
+          <div class="col-6 text-right u-color-basic-darker" id="date">
             <span class="u-color-basic-brighter">Saturday, Feb 1</span> at
             <span class="u-color-basic-brighter">7:28 PM</span>
           </div>
@@ -61,10 +61,9 @@
         </div>
         <div class="row mt-3">
           <div class="col-4">
-            <p class="m-0">
-              Why don’t scientists trust atoms?<br />
-              Because they make up everything!
-            </p>
+            <div class="card" style="height: 100%">
+              <div class="card-body"></div>
+            </div>
           </div>
           <div class="col-8">
             <div
@@ -73,59 +72,26 @@
               data-bs-ride="carousel"
             >
               <div class="carousel-inner">
-                <div class="carousel-item active">
-                  <div
-                    class="item-image"
-                    style="background-image: url(/images/slide-2.png)"
-                  ></div>
-                  <div class="carousel-caption d-none d-md-block">
-                    <div class="card">
-                      <div class="card-body">
-                        <h5>
-                          Condo Closing Preparation
-                          <span class="badge bg-secondary">Needs Response</span>
-                        </h5>
-                        <p class="u-color-basic-brighter m-0">
-                          Outstanding items: payment of homeowner's insurance
-                          premium, borrower attestation signature.
-                        </p>
+                <template id="emailCarouselItem">
+                  <div class="carousel-item">
+                    <div
+                      class="item-image"
+                      style="background-image: url()"
+                    ></div>
+                    <div class="carousel-caption d-none d-md-block">
+                      <div class="card">
+                        <div class="card-body">
+                          <h5>
+                            <span class="badge bg-secondary"
+                              >Needs Response</span
+                            >
+                          </h5>
+                          <p class="u-color-basic-brighter m-0"></p>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-                <div class="carousel-item">
-                  <div
-                    class="item-image"
-                    style="background-image: url(/images/slide-1.png)"
-                  ></div>
-                  <div class="carousel-caption d-none d-md-block">
-                    <div class="card">
-                      <div class="card-body">
-                        <h5>Loan Status: Clear to Close</h5>
-                        <p class="u-color-basic-brighter m-0">
-                          Confirmation from lender that the underwiter has
-                          signed off on the loan.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="carousel-item">
-                  <div
-                    class="item-image"
-                    style="background-image: url(/images/slide-3.png)"
-                  ></div>
-                  <div class="carousel-caption d-none d-md-block">
-                    <div class="card">
-                      <div class="card-body">
-                        <h5>Complete with Docusign: Revised Gift Letters</h5>
-                        <p class="u-color-basic-brighter m-0">
-                          Gift letters from the borrower's family members.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                </template>
               </div>
             </div>
           </div>
