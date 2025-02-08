@@ -11,17 +11,17 @@ import (
 
 func setupEnvVars(serverURL string) {
 	// set up env vars
-	err := os.Setenv("OLLAMA_BASE_URL", serverURL)
+	err := os.Setenv("OPENWEBUI_BASE_URL", serverURL)
 	if err != nil {
 		panic(err)
 	}
 
-	err = os.Setenv("OLLAMA_API_KEY", "test-api-key")
+	err = os.Setenv("OPENWEBUI_API_KEY", "test-api-key")
 	if err != nil {
 		panic(err)
 	}
 
-	err = os.Setenv("OLLAMA_MODEL_NAME", "test-model")
+	err = os.Setenv("OPENWEBUI_MODEL_NAME", "test-model")
 	if err != nil {
 		panic(err)
 	}

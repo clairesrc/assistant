@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"sync"
 )
 
 func main() {
@@ -16,17 +17,39 @@ func main() {
 	// set up web server
 	http.HandleFunc("/updates", func(w http.ResponseWriter, r *http.Request) {
 		err := getUpdates(w, r, ollamaClient)
-		log.Default().Println(fmt.Errorf("cannot get updates: %w", err))
+		writeHttpError(w, http.StatusInternalServerError, "cannot get updates", err)
 	})
 
 	http.ListenAndServe(":8080", nil)
 }
 
-func getUpdates(w http.ResponseWriter, _ *http.Request, o *ollamaClient) error {
-	updates, err := o.generate("What's the weather like today?")
-	if err != nil {
-		writeHttpError(w, http.StatusInternalServerError, "cannot get updates", err)
+func getUpdates(w http.ResponseWriter, r *http.Request, o *ollamaClient) error {
+	// validate POST request
+	if r.Method != http.MethodPost {
+		return fmt.Errorf("method not allowed")
 	}
+
+	// get prompts from request body
+	var prompts []string
+	err := json.NewDecoder(r.Body).Decode(&prompts)
+	if err != nil {
+		return fmt.Errorf("cannot decode request body: %w", err)
+	}
+
+	// concurrently generate updates for each prompt
+	updates := make([]string, len(prompts))
+	var wg sync.WaitGroup
+	for i, prompt := range prompts {
+		wg.Add(1)
+		go func(i int, prompt string) {
+			defer wg.Done()
+			updates[i], err = o.generate(prompt)
+			if err != nil {
+				writeHttpError(w, http.StatusInternalServerError, "cannot get updates", err)
+			}
+		}(i, prompt)
+	}
+	wg.Wait()
 
 	// return updates as json
 	updatesJson, err := json.Marshal(updates)

@@ -2,10 +2,9 @@ FROM --platform=amd64 golang:latest as builder
 
 WORKDIR /app
 
-COPY go.mod go.sum ./src ./
+COPY . .
 RUN go mod download
 
-COPY . .
 
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main .
 

@@ -1,7 +1,5 @@
 package main
 
-// wrapper for Ollama http api
-
 import (
 	"bytes"
 	"encoding/json"
@@ -17,19 +15,19 @@ type ollamaClient struct {
 }
 
 func newOllamaClient() (*ollamaClient, error) {
-	if os.Getenv("OLLAMA_BASE_URL") == "" {
-		return nil, fmt.Errorf("OLLAMA_BASE_URL env var is not set")
+	if os.Getenv("OPENWEBUI_BASE_URL") == "" {
+		return nil, fmt.Errorf("OPENWEBUI_BASE_URL env var is not set")
 	}
-	if os.Getenv("OLLAMA_API_KEY") == "" {
-		return nil, fmt.Errorf("OLLAMA_API_KEY env var is not set")
+	if os.Getenv("OPENWEBUI_API_KEY") == "" {
+		return nil, fmt.Errorf("OPENWEBUI_API_KEY env var is not set")
 	}
-	if os.Getenv("OLLAMA_MODEL_NAME") == "" {
-		return nil, fmt.Errorf("OLLAMA_MODEL_NAME env var is not set")
+	if os.Getenv("OPENWEBUI_MODEL_NAME") == "" {
+		return nil, fmt.Errorf("OPENWEBUI_MODEL_NAME env var is not set")
 	}
 	return &ollamaClient{
-		baseUrl:   os.Getenv("OLLAMA_BASE_URL"),
-		apiKey:    os.Getenv("OLLAMA_API_KEY"),
-		modelName: os.Getenv("OLLAMA_MODEL_NAME"),
+		baseUrl:   os.Getenv("OPENWEBUI_BASE_URL"),
+		apiKey:    os.Getenv("OPENWEBUI_API_KEY"),
+		modelName: os.Getenv("OPENWEBUI_MODEL_NAME"),
 	}, nil
 }
 
@@ -37,12 +35,16 @@ func (o *ollamaClient) generate(prompt string) (string, error) {
 	// payload for /api/generate endpoint
 	updatesPayload := []byte(`{
 		"model": "` + o.modelName + `",
-		"prompt": "` + prompt + `",
-		"stream": false
+		"messages": [
+			{
+				"role": "user",
+				"content": "` + prompt + `"
+			}
+		]
 		}`)
 
 	// create request
-	req, err := http.NewRequest("POST", o.baseUrl+"/api/generate", bytes.NewBuffer(updatesPayload))
+	req, err := http.NewRequest("POST", o.baseUrl+"/api/chat/completions", bytes.NewBuffer(updatesPayload))
 	if err != nil {
 		return "", fmt.Errorf("cannot create request: %w", err)
 	}

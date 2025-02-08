@@ -1,11 +1,11 @@
 # assistant
 
 ## what
-heads-up display/dashboard using local Ollama instance for AI-assisted summaries of personal data.
+heads-up display/dashboard using local Ollama/OpenWebUI instance for AI-assisted summaries of personal data.
 
 web-based display interface.
 
-this assumes you already have ollama running locally.
+this assumes you already have ollama & openwebui running locally.
 
 some features might include:
 - reads your unread emails and summarizes them, flags any that might require you to respond, provides a button to mark-as-read the rest
