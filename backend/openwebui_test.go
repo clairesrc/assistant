@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func setupEnvVars(serverURL string) {
+func setupOpenWebUIEnvVars(serverURL string) {
 	// set up env vars
 	err := os.Setenv("OPENWEBUI_BASE_URL", serverURL)
 	if err != nil {
@@ -27,52 +27,52 @@ func setupEnvVars(serverURL string) {
 	}
 }
 
-func setupMockServer() *httptest.Server {
+func setupOpenWebUIServer() *httptest.Server {
 	// set up mock server
 	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(`{"response": "success"}`))
 	}))
 
-	setupEnvVars(mockServer.URL)
+	setupOpenWebUIEnvVars(mockServer.URL)
 
 	return mockServer
 }
 
-func setupMockInternalErrorServer() *httptest.Server {
+func setupOpenWebUIServerWithInternalError() *httptest.Server {
 	// set up mock server
 	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(`{"error": "something bad happened"}`))
 	}))
 
-	setupEnvVars(mockServer.URL)
+	setupOpenWebUIEnvVars(mockServer.URL)
 
 	return mockServer
 }
 
-func setupMockMalformedErrorServer() *httptest.Server {
+func setupOpenWebUIServerWithMalformedError() *httptest.Server {
 	// set up mock server
 	mockServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(`malformed json`))
 	}))
 
-	setupEnvVars(mockServer.URL)
+	setupOpenWebUIEnvVars(mockServer.URL)
 
 	return mockServer
 }
 
 func TestGenerateSuccess(t *testing.T) {
 	// set up test environment
-	setupMockServer()
+	setupOpenWebUIServer()
 
-	// create a new ollama client
-	ollamaClient, err := newOllamaClient()
+	// create a new openWebUI client
+	openWebUIClient, err := newOpenWebUIClient()
 	require.NoError(t, err)
 
 	// generate some text
-	response, err := ollamaClient.generate("What's the weather like today?")
+	response, err := openWebUIClient.generate("What's the weather like today?")
 	require.NoError(t, err)
 
 	// check that the response is not empty
@@ -82,14 +82,14 @@ func TestGenerateSuccess(t *testing.T) {
 
 func TestGenerateInternalError(t *testing.T) {
 	// set up test environment
-	setupMockInternalErrorServer()
+	setupOpenWebUIServerWithInternalError()
 
-	// create a new ollama client
-	ollamaClient, err := newOllamaClient()
+	// create a new openWebUI client
+	openWebUIClient, err := newOpenWebUIClient()
 	require.NoError(t, err)
 
 	// generate some text
-	response, err := ollamaClient.generate("error")
+	response, err := openWebUIClient.generate("error")
 	require.Error(t, err)
 	require.Empty(t, response)
 	require.Equal(t, "unexpected response code: 500", err.Error())
@@ -97,14 +97,14 @@ func TestGenerateInternalError(t *testing.T) {
 
 func TestGenerateMalformedResponse(t *testing.T) {
 	// set up test environment
-	setupMockMalformedErrorServer()
+	setupOpenWebUIServerWithMalformedError()
 
-	// create a new ollama client
-	ollamaClient, err := newOllamaClient()
+	// create a new openWebUI client
+	openWebUIClient, err := newOpenWebUIClient()
 	require.NoError(t, err)
 
 	// generate some text
-	response, err := ollamaClient.generate("error")
+	response, err := openWebUIClient.generate("error")
 	require.Error(t, err)
 	require.Empty(t, response)
 	require.Contains(t, err.Error(), "cannot unmarshal response")

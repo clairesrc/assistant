@@ -8,13 +8,13 @@ import (
 	"os"
 )
 
-type ollamaClient struct {
+type openWebUIClient struct {
 	baseUrl   string
 	apiKey    string
 	modelName string
 }
 
-func newOllamaClient() (*ollamaClient, error) {
+func newOpenWebUIClient() (*openWebUIClient, error) {
 	if os.Getenv("OPENWEBUI_BASE_URL") == "" {
 		return nil, fmt.Errorf("OPENWEBUI_BASE_URL env var is not set")
 	}
@@ -24,14 +24,14 @@ func newOllamaClient() (*ollamaClient, error) {
 	if os.Getenv("OPENWEBUI_MODEL_NAME") == "" {
 		return nil, fmt.Errorf("OPENWEBUI_MODEL_NAME env var is not set")
 	}
-	return &ollamaClient{
+	return &openWebUIClient{
 		baseUrl:   os.Getenv("OPENWEBUI_BASE_URL"),
 		apiKey:    os.Getenv("OPENWEBUI_API_KEY"),
 		modelName: os.Getenv("OPENWEBUI_MODEL_NAME"),
 	}, nil
 }
 
-func (o *ollamaClient) generate(prompt string) (string, error) {
+func (o *openWebUIClient) generate(prompt string) (string, error) {
 	// payload for /api/generate endpoint
 	updatesPayload := []byte(`{
 		"model": "` + o.modelName + `",

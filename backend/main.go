@@ -8,33 +8,57 @@ import (
 	"sync"
 )
 
+type prompt struct {
+	key string
+	prompt string
+	generateImage bool
+}
+
+// PromptResult is the response value for a given prompt
+type PromptResult struct {
+	Key string `json:"key"`
+	Prompt prompt `json:"prompt"`
+	ImageURL string `json:"image_url,omitempty"`
+}
+
 func main() {
-	ollamaClient, err := newOllamaClient()
+	openWebUIClient, err := newOpenWebUIClient()
 	if err != nil {
-		log.Fatal(fmt.Errorf("can't create Ollama API client: %w", err))
+		log.Fatal(fmt.Errorf("can't create openWebUI API client: %w", err))
+	}
+
+	automaticSDClient, err := newAutomaticSDClient()
+	if err != nil {
+		log.Fatal(fmt.Errorf("can't create automaticSD API client: %w", err))
 	}
 
 	// set up web server
 	http.HandleFunc("/updates", func(w http.ResponseWriter, r *http.Request) {
-		err := getUpdates(w, r, ollamaClient)
+		err := getUpdates(w, r, openWebUIClient, automaticSDClient)
 		writeHttpError(w, http.StatusInternalServerError, "cannot get updates", err)
 	})
 
 	http.ListenAndServe(":8080", nil)
 }
 
-func getUpdates(w http.ResponseWriter, r *http.Request, o *ollamaClient) error {
-	// validate POST request
-	if r.Method != http.MethodPost {
-		return fmt.Errorf("method not allowed")
+func getUpdates(w http.ResponseWriter, r *http.Request, o *openWebUIClient, a *automaticSDClient) error {
+	// get source data: weather
+	weather, err := getWeather()
+	if err != nil {
+		return fmt.Errorf("cannot get weather: %w", err)
 	}
 
-	// get prompts from request body
-	var prompts []string
-	err := json.NewDecoder(r.Body).Decode(&prompts)
+	// get source data: news
+	news, err := getNews()
 	if err != nil {
-		return fmt.Errorf("cannot decode request body: %w", err)
+		return fmt.Errorf("cannot get news: %w", err)
 	}
+
+	// get source data: calendar events
+	calendarEvents, err := getCalendarEvents()
+	if err != nil {
+		return fmt.Errorf("cannot get calendar events: %w", err)
+	}	
 
 	// concurrently generate updates for each prompt
 	updates := make([]string, len(prompts))
