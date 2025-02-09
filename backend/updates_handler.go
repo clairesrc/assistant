@@ -16,7 +16,7 @@ type prompt struct {
 // PromptResult is the response value for a given prompt
 type PromptResult struct {
 	Key string `json:"key"`
-	Prompt prompt `json:"prompt"`
+	Response string `json:"response"`
 	ImageURL string `json:"image_url,omitempty"`
 }
 
@@ -87,7 +87,7 @@ func getUpdates(w http.ResponseWriter, r *http.Request, o openWebUIClient, a aut
 				updates[i].ImageURL = imageURL
 			}
 
-			updates[i].Prompt = promptValue
+			updates[i].Response = promptResult
 			updates[i].Key = promptValue.key
 		}(i, promptValue)
 	}
