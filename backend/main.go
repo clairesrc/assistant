@@ -22,6 +22,23 @@ type PromptResult struct {
 }
 
 func main() {
+	// remote source data clients
+	weatherClient, err := newWeatherClient()
+	if err != nil {
+		log.Fatal(fmt.Errorf("can't create weather client: %w", err))
+	}
+
+	newsClient, err := newNewsClient()
+	if err != nil {
+		log.Fatal(fmt.Errorf("can't create news client: %w", err))
+	}
+
+	calendarClient, err := newCalendarClient()
+	if err != nil {
+		log.Fatal(fmt.Errorf("can't create calendar client: %w", err))
+	}
+
+	// local ai clients
 	openWebUIClient, err := newOpenWebUIClient()
 	if err != nil {
 		log.Fatal(fmt.Errorf("can't create openWebUI API client: %w", err))
@@ -34,28 +51,28 @@ func main() {
 
 	// set up web server
 	http.HandleFunc("/updates", func(w http.ResponseWriter, r *http.Request) {
-		err := getUpdates(w, r, openWebUIClient, automaticSDClient)
+		err := getUpdates(w, r, openWebUIClient, automaticSDClient, weatherClient, newsClient, calendarClient)
 		writeHttpError(w, http.StatusInternalServerError, "cannot get updates", err)
 	})
 
 	http.ListenAndServe(":8080", nil)
 }
 
-func getUpdates(w http.ResponseWriter, r *http.Request, o *openWebUIClient, a *automaticSDClient) error {
+func getUpdates(w http.ResponseWriter, r *http.Request, o *openWebUIClient, a *automaticSDClient, weather *weather, news *news, calendar *calendar) error {
 	// get source data: weather
-	weather, err := getWeather()
+	weather, err := weather.get()
 	if err != nil {
 		return fmt.Errorf("cannot get weather: %w", err)
 	}
 
 	// get source data: news
-	news, err := getNews()
+	news, err := news.get()
 	if err != nil {
 		return fmt.Errorf("cannot get news: %w", err)
 	}
 
 	// get source data: calendar events
-	calendarEvents, err := getCalendarEvents()
+	calendarEvents, err := calendar.getEvents()
 	if err != nil {
 		return fmt.Errorf("cannot get calendar events: %w", err)
 	}	
