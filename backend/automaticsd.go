@@ -9,22 +9,26 @@ import (
 	"encoding/json"
 )
 
-type automaticSDClient struct {
+type automaticSDClient interface {
+	txt2img(prompt string) (string, error)
+}
+
+type automaticSD struct {
 	baseUrl   string
 	modelName string
 }
 
-func newAutomaticSDClient() (*automaticSDClient, error) {
+func newAutomaticSDClient() (automaticSDClient, error) {
 	if os.Getenv("AUTOMATIC1111_BASE_URL") == "" {
 		return nil, fmt.Errorf("AUTOMATIC1111_BASE_URL env var is not set")
 	}
-	return &automaticSDClient{
+	return &automaticSD{
 		baseUrl:   os.Getenv("AUTOMATIC1111_BASE_URL"),
 		modelName: os.Getenv("AUTOMATIC1111_MODEL_NAME"),
 	}, nil
 }
 
-func (c *automaticSDClient) txt2img(prompt string) (string, error) {
+func (c *automaticSD) txt2img(prompt string) (string, error) {
 	// payload for /sdapi/v1/txt2img endpoint
 	payload := []byte(`{
 		"prompt": "` + prompt + `",

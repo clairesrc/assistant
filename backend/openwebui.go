@@ -8,13 +8,17 @@ import (
 	"os"
 )
 
-type openWebUIClient struct {
+type openWebUIClient interface {
+	generate(prompt string) (string, error)
+}
+
+type openWebUI struct {
 	baseUrl   string
 	apiKey    string
 	modelName string
 }
 
-func newOpenWebUIClient() (*openWebUIClient, error) {
+func newOpenWebUIClient() (openWebUIClient, error) {
 	if os.Getenv("OPENWEBUI_BASE_URL") == "" {
 		return nil, fmt.Errorf("OPENWEBUI_BASE_URL env var is not set")
 	}
@@ -24,14 +28,14 @@ func newOpenWebUIClient() (*openWebUIClient, error) {
 	if os.Getenv("OPENWEBUI_MODEL_NAME") == "" {
 		return nil, fmt.Errorf("OPENWEBUI_MODEL_NAME env var is not set")
 	}
-	return &openWebUIClient{
+	return &openWebUI{
 		baseUrl:   os.Getenv("OPENWEBUI_BASE_URL"),
 		apiKey:    os.Getenv("OPENWEBUI_API_KEY"),
 		modelName: os.Getenv("OPENWEBUI_MODEL_NAME"),
 	}, nil
 }
 
-func (o *openWebUIClient) generate(prompt string) (string, error) {
+func (o *openWebUI) generate(prompt string) (string, error) {
 	// payload for /api/generate endpoint
 	updatesPayload := []byte(`{
 		"model": "` + o.modelName + `",

@@ -58,8 +58,8 @@ func TestWeatherClient_GetSuccess(t *testing.T) {
 
 	result, err := weather.get()
 	require.NoError(t, err)
-	require.Equal(t, 20, result.Temp)
-	require.Equal(t, "Clear", result.Weather[0].Main)
+	require.Equal(t, 20.0, result.temp)
+	require.Equal(t, "Clear", result.weather)
 }
 
 func TestWeatherClient_GetInternalError(t *testing.T) {

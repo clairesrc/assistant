@@ -1,9 +1,16 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
+	"os"
 )
+
+type calendarClient interface {
+	getEvents() ([]calendarEvent, error)
+}
 
 type calendar struct {
 	apiKey string
@@ -17,7 +24,7 @@ type calendarEvent struct {
 	End string `json:"end"`
 }
 
-func newCalendarClient() (*calendar, error) {
+func newCalendarClient() (calendarClient, error) {
 	if os.Getenv("CALENDAR_API_KEY") == "" {
 		return nil, fmt.Errorf("CALENDAR_API_KEY is not set")
 	}

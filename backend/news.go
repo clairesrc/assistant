@@ -1,14 +1,20 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
+	"os"
 )
+
+type newsClient interface {
+	get() ([]newsResult, error)
+}
 
 type news struct {
 	apiKey string
-	baseURL string
-	
+	baseURL string	
 }
 
 type newsResult struct {
@@ -17,7 +23,7 @@ type newsResult struct {
 	URL string `json:"url"`
 }
 
-func newNewsClient() (*news, error) {
+func newNewsClient() (newsClient, error) {
 	if os.Getenv("NEWS_API_KEY") == "" {
 		return nil, fmt.Errorf("NEWS_API_KEY is not set")
 	}

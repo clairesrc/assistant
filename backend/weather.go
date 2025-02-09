@@ -5,8 +5,13 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"time"
 )
+
+type weatherClient interface {
+	get() (*weatherResult, error)
+}
 
 type weather struct {
 	apiKey string
@@ -28,7 +33,7 @@ const (
 	weatherCacheDuration = 10 * time.Minute
 )	
 
-func newWeatherClient() (*weather, error) {
+func newWeatherClient() (weatherClient, error) {
 	if os.Getenv("OPENWEATHER_API_KEY") == "" {
 		return nil, fmt.Errorf("OPENWEATHER_API_KEY is not set")
 	}
@@ -62,8 +67,8 @@ func (w *weather) get() (*weatherResult, error) {
 	// if cache is fresh, return cached value
 	if time.Since(w.lastUpdated) < weatherCacheDuration {
 		return &weatherResult{
-			temp: w.value,
-			weather: w.value,
+			temp: w.value.temp,
+			weather: w.value.weather,
 		}, nil
 	}
 
