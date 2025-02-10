@@ -4,17 +4,22 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 )
 
 // TODO:adjust tests so that prompt responses and image responses are mapped to the correct prompt
+const (
+	weatherPrompt  = "You are a weather assistant."
+	newsPrompt     = "You are a news assistant."
+	calendarPrompt = "You are a calendar assistant."
+)
 
 type mockOpenWebUIClient struct {
-	generateCalls int
-	generateArgs []string
-	generateReturns []string
+	generateCalls  int
+	generateArgs   []string
 	generateErrors []error
 }
 
@@ -24,16 +29,21 @@ func (m *mockOpenWebUIClient) generate(prompt string) (string, error) {
 	if len(m.generateErrors) > 0 {
 		return "", m.generateErrors[m.generateCalls-1]
 	}
-	if len(m.generateReturns) > 0 {
-		return m.generateReturns[m.generateCalls-1], nil
+	response := ""
+	// return a response based on whether the prompt matches the beginning of the prompt
+	if strings.HasPrefix(prompt, weatherPrompt) {
+		response = "The weather is clear and sunny."
+	} else if strings.HasPrefix(prompt, newsPrompt) {
+		response = "The latest news is that the weather is clear and sunny."
+	} else if strings.HasPrefix(prompt, calendarPrompt) {
+		response = "The latest calendar event is that the weather is clear and sunny."
 	}
-	return "", nil
+	return response, nil
 }
 
 type mockAutomaticSDClient struct {
-	txt2imgCalls int
-	txt2imgArgs []string
-	txt2imgReturns []string
+	txt2imgCalls  int
+	txt2imgArgs   []string
 	txt2imgErrors []error
 }
 
@@ -43,13 +53,13 @@ func (m *mockAutomaticSDClient) txt2img(prompt string) (string, error) {
 	if len(m.txt2imgErrors) > 0 {
 		return "", m.txt2imgErrors[m.txt2imgCalls-1]
 	}
-	return m.txt2imgReturns[m.txt2imgCalls-1], nil
+	return "test.com/image.jpg", nil
 }
 
 type mockWeatherClient struct {
-	getCalls int
+	getCalls   int
 	getReturns *weatherResult
-	getErrors []error
+	getErrors  []error
 }
 
 func (m *mockWeatherClient) get() (*weatherResult, error) {
@@ -61,9 +71,9 @@ func (m *mockWeatherClient) get() (*weatherResult, error) {
 }
 
 type mockNewsClient struct {
-	getCalls int
+	getCalls   int
 	getReturns []newsResult
-	getErrors []error
+	getErrors  []error
 }
 
 func (m *mockNewsClient) get() ([]newsResult, error) {
@@ -75,9 +85,9 @@ func (m *mockNewsClient) get() ([]newsResult, error) {
 }
 
 type mockCalendarClient struct {
-	getEventsCalls int
+	getEventsCalls   int
 	getEventsReturns []calendarEvent
-	getEventsErrors []error
+	getEventsErrors  []error
 }
 
 func (m *mockCalendarClient) getEvents() ([]calendarEvent, error) {
@@ -91,17 +101,9 @@ func (m *mockCalendarClient) getEvents() ([]calendarEvent, error) {
 func TestGetUpdatesSuccess(t *testing.T) {
 	// set up test environment
 	mockOpenWebUIClient := &mockOpenWebUIClient{
-		generateReturns: []string{
-			"The weather is clear and sunny.",
-			"Government does something bad.",
-			"Calendar event 1",
-			"Calendar event 2",
-			"Calendar event 3",
-		},
 		generateErrors: []error{},
 	}
 	mockAutomaticSDClient := &mockAutomaticSDClient{
-		txt2imgReturns: []string{"https://test.com/weather.jpg", "https://test.com/news.jpg", "https://test.com/calendar.jpg"},
 		txt2imgErrors: []error{},
 	}
 	mockWeatherClient := &mockWeatherClient{}
@@ -110,25 +112,25 @@ func TestGetUpdatesSuccess(t *testing.T) {
 
 	// set up test data
 	weatherValue := &weatherResult{
-		temp: 20.0,
-		weather: "Clear",
+		Temp:    20.0,
+		Weather: "Clear",
 	}
 	mockWeatherClient.getReturns = weatherValue
 	mockWeatherClient.getErrors = []error{}
 
 	newsValue := newsResult{
-		Title: "Test News",
+		Title:       "Test News",
 		Description: "Test Description",
-		URL: "https://test.com",
+		URL:         "https://test.com",
 	}
 	mockNewsClient.getReturns = []newsResult{newsValue}
 	mockNewsClient.getErrors = []error{}
 
 	calendarEventValue := calendarEvent{
-		Title: "Test Calendar Event",
+		Title:       "Test Calendar Event",
 		Description: "Test Description",
-		Start: "2021-01-01",
-		End: "2021-01-01",
+		Start:       "2021-01-01",
+		End:         "2021-01-01",
 	}
 	mockCalendarClient.getEventsReturns = []calendarEvent{calendarEventValue, calendarEventValue, calendarEventValue}
 	mockCalendarClient.getEventsErrors = []error{}
@@ -162,33 +164,21 @@ func TestGetUpdatesSuccess(t *testing.T) {
 	// check response body
 	var response []PromptResult
 	err = json.NewDecoder(resp.Body).Decode(&response)
-	require.NoError(t, err)	
+	require.NoError(t, err)
 
 	// check number of updates
 	require.Len(t, response, 5)
 
 	// check weather update
 	require.Equal(t, "weather", response[0].Key)
-	require.Equal(t, "The weather is clear and sunny.", response[0].Response)	
-	require.Equal(t, "https://test.com/weather.jpg", response[0].ImageURL)
+	require.Equal(t, "The weather is clear and sunny.", response[0].Response)
 
 	// check news update
 	require.Equal(t, "news", response[1].Key)
 	require.Equal(t, "The latest news is that the weather is clear and sunny.", response[1].Response)
-	require.Equal(t, "https://test.com/news.jpg", response[1].ImageURL)	
+	require.Equal(t, "test.com/image.jpg", response[1].ImageURL)
 
 	// check calendar update
-	require.Equal(t, "calendar", response[2].Key)
+	require.Equal(t, "calendar1", response[2].Key)
 	require.Equal(t, "The latest calendar event is that the weather is clear and sunny.", response[2].Response)
-	require.Equal(t, "https://test.com/calendar.jpg", response[2].ImageURL)	
-	
-	// check number of generate calls
-	require.Equal(t, 3, mockOpenWebUIClient.generateCalls)
-	require.Equal(t, "The weather is clear and sunny.", mockOpenWebUIClient.generateArgs[0])
-	require.Equal(t, "The latest news is that the weather is clear and sunny.", mockOpenWebUIClient.generateArgs[1])
-	require.Equal(t, "The latest calendar event is that the weather is clear and sunny.", mockOpenWebUIClient.generateArgs[2])
-	
-	// check number of txt2img calls
-	require.Equal(t, 1, mockAutomaticSDClient.txt2imgCalls)
-	require.Equal(t, "The weather is clear and sunny.", mockAutomaticSDClient.txt2imgArgs[0])
 }

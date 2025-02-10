@@ -14,24 +14,24 @@ type weatherClient interface {
 }
 
 type weather struct {
-	apiKey string
-	latitude string
+	apiKey    string
+	latitude  string
 	longitude string
-	timezone string
-	baseURL string
+	timezone  string
+	baseURL   string
 
-	value weatherResult
+	value       weatherResult
 	lastUpdated time.Time
 }
 
 type weatherResult struct {
-	temp float64 `json:"temp"`
-	weather string `json:"weather"`
+	Temp    float64 `json:"temp"`
+	Weather string  `json:"weather"`
 }
 
 const (
 	weatherCacheDuration = 10 * time.Minute
-)	
+)
 
 func newWeatherClient() (weatherClient, error) {
 	if os.Getenv("OPENWEATHER_API_KEY") == "" {
@@ -55,11 +55,11 @@ func newWeatherClient() (weatherClient, error) {
 	}
 
 	return &weather{
-		apiKey: os.Getenv("OPENWEATHER_API_KEY"),
-		latitude: os.Getenv("OPENWEATHER_LATITUDE"),
+		apiKey:    os.Getenv("OPENWEATHER_API_KEY"),
+		latitude:  os.Getenv("OPENWEATHER_LATITUDE"),
 		longitude: os.Getenv("OPENWEATHER_LONGITUDE"),
-		timezone: os.Getenv("OPENWEATHER_TIMEZONE"),
-		baseURL: os.Getenv("OPENWEATHER_BASE_URL"),
+		timezone:  os.Getenv("OPENWEATHER_TIMEZONE"),
+		baseURL:   os.Getenv("OPENWEATHER_BASE_URL"),
 	}, nil
 }
 
@@ -67,8 +67,8 @@ func (w *weather) get() (*weatherResult, error) {
 	// if cache is fresh, return cached value
 	if time.Since(w.lastUpdated) < weatherCacheDuration {
 		return &weatherResult{
-			temp: w.value.temp,
-			weather: w.value.weather,
+			Temp:    w.value.Temp,
+			Weather: w.value.Weather,
 		}, nil
 	}
 
@@ -91,20 +91,19 @@ func (w *weather) get() (*weatherResult, error) {
 	var weatherData struct {
 		Current struct {
 			Temperature float64 `json:"temp"`
-			Weather []struct {
+			Weather     []struct {
 				Main string `json:"main"`
 			} `json:"weather"`
 		} `json:"current"`
 	}
-	
+
 	err = json.Unmarshal(body, &weatherData)
 	if err != nil {
 		return nil, fmt.Errorf("cannot parse weather: %w", err)
 	}
-
 	weather := weatherResult{
-		temp: weatherData.Current.Temperature,
-		weather: weatherData.Current.Weather[0].Main,
+		Temp:    weatherData.Current.Temperature,
+		Weather: weatherData.Current.Weather[0].Main,
 	}
 
 	w.value = weather

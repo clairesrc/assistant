@@ -1,10 +1,10 @@
 package main
 
 import (
-	"testing"
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"testing"
 
 	"github.com/stretchr/testify/require"
 )
@@ -58,8 +58,8 @@ func TestWeatherClient_GetSuccess(t *testing.T) {
 
 	result, err := weather.get()
 	require.NoError(t, err)
-	require.Equal(t, 20.0, result.temp)
-	require.Equal(t, "Clear", result.weather)
+	require.Equal(t, 20.0, result.Temp)
+	require.Equal(t, "Clear", result.Weather)
 }
 
 func TestWeatherClient_GetInternalError(t *testing.T) {

@@ -8,19 +8,19 @@ import (
 )
 
 type prompt struct {
-	key string
-	prompt string
+	key           string
+	prompt        string
 	generateImage bool
 }
 
 // PromptResult is the response value for a given prompt
 type PromptResult struct {
-	Key string `json:"key"`
+	Key      string `json:"key"`
 	Response string `json:"response"`
 	ImageURL string `json:"image_url,omitempty"`
 }
 
-func getUpdates(w http.ResponseWriter, r *http.Request, o openWebUIClient, a automaticSDClient, weather weatherClient, news newsClient, calendar calendarClient) error {
+func getUpdates(w http.ResponseWriter, _ *http.Request, o openWebUIClient, a automaticSDClient, weather weatherClient, news newsClient, calendar calendarClient) error {
 	// get source data: weather
 	weatherResult, err := weather.get()
 	if err != nil {
@@ -41,28 +41,28 @@ func getUpdates(w http.ResponseWriter, r *http.Request, o openWebUIClient, a aut
 
 	prompts := []prompt{
 		{
-			key: "weather",
-			prompt: fmt.Sprintf("You are a weather assistant. The current temperature is %f°C and the weather is %s. Write a very short comment on the weather.", weatherResult.temp, weatherResult.weather),
-			generateImage: false,
-			},
-		{
-			key: "news",
-			prompt: fmt.Sprintf("You are a news assistant. The latest news are below: %v.\n \n Write a very short comment on the news.", newsResults),
+			key:           "weather",
+			prompt:        fmt.Sprintf("You are a weather assistant. The current temperature is %f°C and the weather is %s. Write a very short comment on the weather.", weatherResult.Temp, weatherResult.Weather),
 			generateImage: false,
 		},
 		{
-			key: "calendar1"	,
-			prompt: fmt.Sprintf("You are a calendar assistant. The calendar event is below: %v.\n \n Write a very short comment on the calendar event.", calendarEvents[0]),
+			key:           "news",
+			prompt:        fmt.Sprintf("You are a news assistant. The latest news are below: %v.\n \n Write a very short comment on the news.", newsResults),
+			generateImage: true,
+		},
+		{
+			key:           "calendar1",
+			prompt:        fmt.Sprintf("You are a calendar assistant. The calendar event is below: %v.\n \n Write a very short comment on the calendar event.", calendarEvents[0]),
 			generateImage: false,
 		},
 		{
-			key: "calendar2",
-			prompt: fmt.Sprintf("You are a calendar assistant. The calendar event is below: %v.\n \n Write a very short comment on the calendar event.", calendarEvents[1]),
+			key:           "calendar2",
+			prompt:        fmt.Sprintf("You are a calendar assistant. The calendar event is below: %v.\n \n Write a very short comment on the calendar event.", calendarEvents[1]),
 			generateImage: false,
 		},
 		{
-			key: "calendar3",
-			prompt: fmt.Sprintf("You are a calendar assistant. The calendar event is below: %v.\n \n Write a very short comment on the calendar event.", calendarEvents[2]),
+			key:           "calendar3",
+			prompt:        fmt.Sprintf("You are a calendar assistant. The calendar event is below: %v.\n \n Write a very short comment on the calendar event.", calendarEvents[2]),
 			generateImage: false,
 		},
 	}
